@@ -1,0 +1,1296 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrustVault - Secure Document Management</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f5f2fc;
+    color: #29243b;
+}
+
+header {
+    background: #4b238c;
+    color: white;
+    padding: 18px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+header h2 { font-size: 25px; }
+
+nav {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+button {
+    background: #6d3db5;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    margin: 3px;
+}
+
+button:hover { background: #8b5bd0; }
+
+nav button {
+    background: transparent;
+    color: white;
+}
+
+nav button:hover { background: #7047a8; }
+
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 30px auto;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 22px;
+    border-radius: 12px;
+    box-shadow: 0 3px 15px #ddd5eb;
+}
+
+h2, h3 {
+    color: #4b238c;
+    margin-bottom: 15px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 14px;
+    border: 1px solid #d3c6e8;
+    border-radius: 7px;
+}
+
+.auth {
+    max-width: 430px;
+    margin: 55px auto;
+}
+
+.auth button[type="submit"] { width: 100%; }
+
+.auth a {
+    color: #6d3db5;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.message {
+    color: #c0392b;
+    margin: 12px 0;
+    font-size: 14px;
+}
+
+.muted {
+    color: #777;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.show-password {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: -5px 0 12px;
+    font-size: 14px;
+}
+
+.show-password input {
+    width: auto;
+    margin: 0;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat {
+    background: white;
+    padding: 22px;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px #ddd5eb;
+}
+
+.stat h2 { font-size: 30px; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+th {
+    background: #eee7f8;
+    color: #4b238c;
+}
+
+.small-btn {
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+.danger { background: #c0392b; }
+.success { background: #24864c; }
+.hidden { display: none !important; }
+
+@media(max-width: 600px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    table { font-size: 12px; }
+    th, td { padding: 7px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>🔐 TrustVault</h2>
+
+    <nav id="mainNav" class="hidden">
+        <button onclick="showSection('dashboard')">Dashboard</button>
+        <button onclick="showSection('documents')">Documents</button>
+        <button onclick="showSection('requests')">Requests</button>
+        <button onclick="showSection('versions')">Versions</button>
+        <button onclick="showSection('trash')">Trash</button>
+        <button onclick="showSection('audit')">Audit Log</button>
+        <button onclick="logout()">Logout</button>
+    </nav>
+</header>
+
+<!-- REGISTER PAGE -->
+<div id="registerPage" class="container auth card">
+
+    <h2>Create Account</h2>
+
+    <form onsubmit="register(event)">
+
+        <label>Username</label>
+        <input id="regUsername" type="text"
+               placeholder="Enter username" required>
+
+        <label>Email</label>
+        <input id="regEmail" type="email"
+               placeholder="Enter email address" required>
+
+        <label>Password</label>
+        <input id="regPassword" type="password"
+               placeholder="Create password" required>
+
+        <label class="show-password">
+            <input type="checkbox"
+                   onchange="togglePassword('regPassword')">
+            Show password
+        </label>
+
+        <label>Confirm Password</label>
+        <input id="confirmPassword" type="password"
+               placeholder="Confirm password" required>
+
+        <label class="show-password">
+            <input type="checkbox"
+                   onchange="togglePassword('confirmPassword')">
+            Show password
+        </label>
+
+        <p class="muted">
+            Password requirements:
+            <br>• Exactly one uppercase letter (A-Z)
+            <br>• Remaining letters must be lowercase (a-z)
+            <br>• At least one special character (@, #, $)
+            <br>• At least one digit (0-9)
+            <br>• Any number of digits is allowed
+        </p>
+
+        <button type="submit">Register</button>
+
+    </form>
+
+    <p id="registerMessage" class="message"></p>
+
+</div>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="container auth card hidden">
+
+    <h2>Welcome Back</h2>
+
+    <form onsubmit="login(event)">
+
+        <label>Email</label>
+        <input id="loginEmail" type="email"
+               placeholder="Enter registered email" required>
+
+        <label>Password</label>
+        <input id="loginPassword" type="password"
+               placeholder="Enter password" required>
+
+        <label class="show-password">
+            <input type="checkbox"
+                   onchange="togglePassword('loginPassword')">
+            Show password
+        </label>
+
+        <button type="submit">Login</button>
+
+    </form>
+
+    <p id="loginMessage" class="message"></p>
+
+    <p>New user?
+        <a onclick="showRegister()">Create an account</a>
+    </p>
+
+</div>
+
+<!-- MAIN APPLICATION -->
+<main id="app" class="container hidden">
+
+    <section id="dashboard" class="section">
+
+        <div class="card">
+            <h2>Welcome to TrustVault 👋</h2>
+            <p>Secure Document Management System</p>
+            <p id="welcomeUser"></p>
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                <p>Total Documents</p>
+                <h2 id="totalDocs">0</h2>
+            </div>
+
+            <div class="stat">
+                <p>My Documents</p>
+                <h2 id="myDocs">0</h2>
+            </div>
+
+            <div class="stat">
+                <p>Access Requests</p>
+                <h2 id="totalRequests">0</h2>
+            </div>
+
+            <div class="stat">
+                <p>Deleted Documents</p>
+                <h2 id="totalTrash">0</h2>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- DOCUMENTS -->
+    <section id="documents" class="section hidden">
+
+        <div class="card">
+            <h2>Document Management</h2>
+
+            <input type="file" id="documentFile">
+
+            <button onclick="uploadDocument()">Upload Document</button>
+
+            <p id="uploadMessage" class="message"></p>
+        </div>
+
+        <div class="card">
+            <h3>All Documents</h3>
+
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Owner</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documentTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- REQUESTS -->
+    <section id="requests" class="section hidden">
+
+        <div class="card">
+            <h2>Access Requests</h2>
+
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Requester</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- VERSION HISTORY -->
+    <section id="versions" class="section hidden">
+
+        <div class="card">
+            <h2>Version History</h2>
+
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Version</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="versionTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- TRASH -->
+    <section id="trash" class="section hidden">
+
+        <div class="card">
+            <h2>Trash</h2>
+
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Owner</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trashTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- AUDIT -->
+    <section id="audit" class="section hidden">
+
+        <div class="card">
+            <h2>Activity Audit Log</h2>
+
+            <button onclick="downloadCSV()">Download CSV Report</button>
+
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Activity</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+
+// STORAGE FUNCTIONS
+function getData(key, fallback = []) {
+    try {
+        return JSON.parse(localStorage.getItem(key)) || fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function saveData(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+}
+
+let users = getData("tv_accounts");
+let documents = getData("tv_documents");
+let requests = getData("tv_requests");
+let versions = getData("tv_versions");
+let trash = getData("tv_trash");
+let audit = getData("tv_audit");
+
+let currentUser = null;
+
+function refreshData() {
+    users = getData("tv_accounts");
+    documents = getData("tv_documents");
+    requests = getData("tv_requests");
+    versions = getData("tv_versions");
+    trash = getData("tv_trash");
+    audit = getData("tv_audit");
+}
+
+// SHOW PASSWORD
+function togglePassword(id) {
+    const field = document.getElementById(id);
+    field.type = field.type === "password" ? "text" : "password";
+}
+
+// PAGE NAVIGATION
+function showRegister() {
+
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("registerPage").classList.remove("hidden");
+
+    document.getElementById("loginMessage").textContent = "";
+    document.getElementById("registerMessage").textContent = "";
+}
+
+function showLogin() {
+
+    document.getElementById("registerPage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
+
+    document.getElementById("registerMessage").textContent = "";
+    document.getElementById("loginMessage").textContent = "";
+}
+
+// EMAIL VALIDATION
+function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+// PASSWORD VALIDATION
+// Exactly one uppercase, at least one lowercase,
+// at least one special character and at least one digit.
+function validatePassword(password) {
+
+    const uppercase = /[A-Z]/.test(password);
+    const lowercase = /[a-z]/.test(password);
+    const special = /[^A-Za-z0-9]/.test(password);
+    const digits = /\d/.test(password);
+
+    const uppercaseCount = (password.match(/[A-Z]/g) || []).length;
+
+    return uppercase &&
+           lowercase &&
+           special &&
+           digits &&
+           uppercaseCount === 1;
+}
+
+// REGISTER
+function register(event) {
+
+    event.preventDefault();
+    refreshData();
+
+    const username = document.getElementById("regUsername").value.trim();
+    const email = document.getElementById("regEmail").value.trim().toLowerCase();
+    const password = document.getElementById("regPassword").value;
+    const confirm = document.getElementById("confirmPassword").value;
+
+    const message = document.getElementById("registerMessage");
+
+    if (!username) {
+        message.textContent = "Please enter username.";
+        return;
+    }
+
+    if (!validateEmail(email)) {
+        message.textContent = "Enter a valid email address.";
+        return;
+    }
+
+    if (!validatePassword(password)) {
+        message.textContent =
+            "Password must contain exactly one uppercase letter, lowercase letters, at least one special character and at least one digit.";
+        return;
+    }
+
+    if (password !== confirm) {
+        message.textContent = "Passwords do not match.";
+        return;
+    }
+
+    if (users.some(user => user.email === email)) {
+        message.textContent =
+            "Email already registered. Please use another email.";
+        return;
+    }
+
+    const newUser = {
+        id: Date.now().toString() +
+            Math.random().toString(36).slice(2),
+        username: username,
+        email: email,
+        password: password
+    };
+
+    users.push(newUser);
+    saveData("tv_accounts", users);
+
+    alert("Registration successful! Please login.");
+
+    document.getElementById("regUsername").value = "";
+    document.getElementById("regEmail").value = "";
+    document.getElementById("regPassword").value = "";
+    document.getElementById("confirmPassword").value = "";
+
+    showLogin();
+    document.getElementById("loginEmail").value = email;
+    document.getElementById("loginPassword").value = "";
+}
+
+// LOGIN
+function login(event) {
+
+    event.preventDefault();
+    refreshData();
+
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+    const password = document.getElementById("loginPassword").value;
+
+    const message = document.getElementById("loginMessage");
+
+    if (!validateEmail(email)) {
+        message.textContent = "Enter a valid email address.";
+        return;
+    }
+
+    const user = users.find(item =>
+        item.email === email && item.password === password
+    );
+
+    if (!user) {
+        message.textContent = "Invalid email or password.";
+        return;
+    }
+
+    currentUser = user;
+    sessionStorage.setItem("tv_session", user.id);
+
+    message.textContent = "";
+    logActivity("Logged in");
+    openApp();
+}
+
+// OPEN DASHBOARD
+function openApp() {
+
+    document.getElementById("registerPage").classList.add("hidden");
+    document.getElementById("loginPage").classList.add("hidden");
+
+    document.getElementById("app").classList.remove("hidden");
+    document.getElementById("mainNav").classList.remove("hidden");
+
+    document.getElementById("welcomeUser").textContent =
+        "Logged in as: " + currentUser.username;
+
+    updateDashboard();
+    showSection("dashboard");
+}
+
+// LOGOUT
+function logout() {
+
+    logActivity("Logged out");
+
+    sessionStorage.removeItem("tv_session");
+    currentUser = null;
+
+    document.getElementById("app").classList.add("hidden");
+    document.getElementById("mainNav").classList.add("hidden");
+    document.getElementById("loginPassword").value = "";
+
+    showLogin();
+}
+
+// SECTION NAVIGATION
+function showSection(section) {
+
+    document.querySelectorAll(".section").forEach(item => {
+        item.classList.add("hidden");
+    });
+
+    document.getElementById(section).classList.remove("hidden");
+
+    if (section === "dashboard") updateDashboard();
+    if (section === "documents") renderDocuments();
+    if (section === "requests") renderRequests();
+    if (section === "versions") renderVersions();
+    if (section === "trash") renderTrash();
+    if (section === "audit") renderAudit();
+}
+
+// AUDIT
+function logActivity(activity) {
+
+    if (!currentUser) return;
+
+    audit = getData("tv_audit");
+
+    audit.unshift({
+        userId: currentUser.id,
+        user: currentUser.username,
+        activity: activity,
+        date: new Date().toLocaleString()
+    });
+
+    saveData("tv_audit", audit);
+}
+
+// DASHBOARD
+function updateDashboard() {
+
+    refreshData();
+
+    document.getElementById("totalDocs").textContent =
+        documents.filter(doc => !doc.deleted).length;
+
+    document.getElementById("myDocs").textContent =
+        documents.filter(doc =>
+            doc.ownerId === currentUser.id && !doc.deleted
+        ).length;
+
+    document.getElementById("totalRequests").textContent =
+        requests.filter(req =>
+            req.ownerId === currentUser.id &&
+            req.status === "Pending"
+        ).length;
+
+    document.getElementById("totalTrash").textContent =
+        trash.filter(doc => doc.ownerId === currentUser.id).length;
+}
+
+// UPLOAD DOCUMENT
+function uploadDocument() {
+
+    const fileInput = document.getElementById("documentFile");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        document.getElementById("uploadMessage").textContent =
+            "Please select a document.";
+        return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+        document.getElementById("uploadMessage").textContent =
+            "File must be smaller than 2 MB.";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function() {
+
+        documents = getData("tv_documents");
+
+        const doc = {
+            id: Date.now().toString(),
+            name: file.name,
+            type: file.type,
+            data: reader.result,
+            ownerId: currentUser.id,
+            ownerName: currentUser.username,
+            date: new Date().toLocaleString(),
+            deleted: false,
+            sharedWith: []
+        };
+
+        documents.push(doc);
+        saveData("tv_documents", documents);
+
+        addVersion(doc);
+        logActivity("Uploaded document: " + file.name);
+
+        fileInput.value = "";
+
+        document.getElementById("uploadMessage").textContent =
+            "Document uploaded successfully!";
+
+        renderDocuments();
+        updateDashboard();
+    };
+
+    reader.readAsDataURL(file);
+}
+
+// CHECK ACCESS
+function hasAccess(doc) {
+    return doc.ownerId === currentUser.id ||
+        (doc.sharedWith || []).includes(currentUser.id);
+}
+
+// DISPLAY DOCUMENTS
+function renderDocuments() {
+
+    refreshData();
+
+    const table = document.getElementById("documentTable");
+    table.innerHTML = "";
+
+    documents.filter(doc =>
+        !doc.deleted && hasAccess(doc)
+    ).forEach(doc => {
+
+        const row = document.createElement("tr");
+
+        const name = document.createElement("td");
+        name.textContent = doc.name;
+
+        const owner = document.createElement("td");
+        owner.textContent = doc.ownerName;
+
+        const date = document.createElement("td");
+        date.textContent = doc.date;
+
+        const actions = document.createElement("td");
+
+        const download = document.createElement("button");
+        download.className = "small-btn";
+        download.textContent = "Download";
+        download.onclick = () => downloadDocument(doc.id);
+
+        actions.appendChild(download);
+
+        if (doc.ownerId === currentUser.id) {
+
+            const share = document.createElement("button");
+            share.className = "small-btn";
+            share.textContent = "Share";
+            share.onclick = () => shareDocument(doc.id);
+
+            const remove = document.createElement("button");
+            remove.className = "small-btn danger";
+            remove.textContent = "Delete";
+            remove.onclick = () => deleteDocument(doc.id);
+
+            actions.append(share, remove);
+
+        } else {
+
+            const request = document.createElement("button");
+            request.className = "small-btn";
+            request.textContent = "Request Access";
+            request.onclick = () => requestAccess(doc.id);
+
+            actions.appendChild(request);
+        }
+
+        row.append(name, owner, date, actions);
+        table.appendChild(row);
+    });
+
+    if (!table.children.length) {
+        table.innerHTML =
+            "<tr><td colspan='4'>No documents available.</td></tr>";
+    }
+}
+
+// DOWNLOAD
+function downloadDocument(id) {
+
+    const doc = getData("tv_documents").find(item => item.id === id);
+
+    if (!doc || doc.deleted || !hasAccess(doc)) {
+        alert("You do not have permission.");
+        return;
+    }
+
+    const link = document.createElement("a");
+    link.href = doc.data;
+    link.download = doc.name;
+    link.click();
+
+    logActivity("Downloaded document: " + doc.name);
+}
+
+// SHARE DOCUMENT
+function shareDocument(id) {
+
+    const doc = getData("tv_documents").find(item => item.id === id);
+
+    if (!doc || doc.ownerId !== currentUser.id) {
+        alert("Only owner can share.");
+        return;
+    }
+
+    const email = prompt("Enter registered user's email:");
+
+    if (!email) return;
+
+    const target = getData("tv_accounts").find(
+        user => user.email === email.trim().toLowerCase()
+    );
+
+    if (!target) {
+        alert("User not found. Please ask them to register.");
+        return;
+    }
+
+    if (target.id === currentUser.id) {
+        alert("You already own this document.");
+        return;
+    }
+
+    doc.sharedWith = doc.sharedWith || [];
+
+    if (!doc.sharedWith.includes(target.id)) {
+        doc.sharedWith.push(target.id);
+    }
+
+    documents = getData("tv_documents");
+
+    saveData("tv_documents",
+        documents.map(item => item.id === id ? doc : item)
+    );
+
+    logActivity("Shared document: " + doc.name);
+    alert("Document shared successfully!");
+}
+
+// REQUEST ACCESS
+function requestAccess(id) {
+
+    const doc = getData("tv_documents").find(item => item.id === id);
+
+    if (!doc || doc.deleted) return;
+
+    requests = getData("tv_requests");
+
+    if (requests.some(req =>
+        req.documentId === id &&
+        req.requesterId === currentUser.id &&
+        req.status === "Pending"
+    )) {
+        alert("You already have a pending request.");
+        return;
+    }
+
+    requests.push({
+        id: Date.now().toString(),
+        documentId: id,
+        documentName: doc.name,
+        requesterId: currentUser.id,
+        requesterName: currentUser.username,
+        ownerId: doc.ownerId,
+        status: "Pending"
+    });
+
+    saveData("tv_requests", requests);
+    logActivity("Requested access to: " + doc.name);
+
+    alert("Access request sent.");
+}
+
+// REQUEST TABLE
+function renderRequests() {
+
+    refreshData();
+
+    const table = document.getElementById("requestTable");
+    table.innerHTML = "";
+
+    requests.filter(req =>
+        req.ownerId === currentUser.id ||
+        req.requesterId === currentUser.id
+    ).forEach(req => {
+
+        const row = document.createElement("tr");
+
+        [
+            req.documentName,
+            req.requesterName,
+            users.find(u => u.id === req.ownerId)?.username || "Unknown",
+            req.status
+        ].forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        const actions = document.createElement("td");
+
+        if (req.ownerId === currentUser.id &&
+            req.status === "Pending") {
+
+            const approve = document.createElement("button");
+            approve.className = "small-btn success";
+            approve.textContent = "Approve";
+            approve.onclick = () => updateRequest(req.id, "Approved");
+
+            const reject = document.createElement("button");
+            reject.className = "small-btn danger";
+            reject.textContent = "Reject";
+            reject.onclick = () => updateRequest(req.id, "Rejected");
+
+            actions.append(approve, reject);
+
+        } else {
+            actions.textContent = "-";
+        }
+
+        row.appendChild(actions);
+        table.appendChild(row);
+    });
+
+    if (!table.children.length) {
+        table.innerHTML =
+            "<tr><td colspan='5'>No requests found.</td></tr>";
+    }
+}
+
+// APPROVE / REJECT REQUEST
+function updateRequest(id, status) {
+
+    requests = getData("tv_requests");
+
+    const req = requests.find(item => item.id === id);
+
+    if (!req || req.ownerId !== currentUser.id ||
+        req.status !== "Pending") {
+        alert("You cannot update this request.");
+        return;
+    }
+
+    req.status = status;
+    saveData("tv_requests", requests);
+
+    if (status === "Approved") {
+
+        documents = getData("tv_documents");
+
+        const doc = documents.find(
+            item => item.id === req.documentId
+        );
+
+        if (doc && doc.ownerId === currentUser.id && !doc.deleted) {
+
+            doc.sharedWith = doc.sharedWith || [];
+
+            if (!doc.sharedWith.includes(req.requesterId)) {
+                doc.sharedWith.push(req.requesterId);
+            }
+
+            saveData("tv_documents", documents);
+        }
+    }
+
+    logActivity(status + " access request for: " + req.documentName);
+    renderRequests();
+}
+
+// VERSION HISTORY
+function addVersion(doc) {
+
+    versions = getData("tv_versions");
+
+    versions.push({
+        id: Date.now().toString(),
+        documentId: doc.id,
+        name: doc.name,
+        version: versions.filter(v =>
+            v.documentId === doc.id
+        ).length + 1,
+        date: new Date().toLocaleString(),
+        data: doc.data
+    });
+
+    saveData("tv_versions", versions);
+}
+
+function renderVersions() {
+
+    refreshData();
+
+    const table = document.getElementById("versionTable");
+    table.innerHTML = "";
+
+    versions.filter(v => {
+
+        const doc = documents.find(d => d.id === v.documentId);
+
+        return doc && hasAccess(doc);
+
+    }).forEach(v => {
+
+        const row = document.createElement("tr");
+
+        [v.name, "Version " + v.version, v.date]
+        .forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        const action = document.createElement("td");
+
+        const button = document.createElement("button");
+        button.className = "small-btn";
+        button.textContent = "Download";
+
+        button.onclick = () => {
+
+            const link = document.createElement("a");
+            link.href = v.data;
+            link.download = v.name;
+            link.click();
+        };
+
+        action.appendChild(button);
+        row.appendChild(action);
+
+        table.appendChild(row);
+    });
+
+    if (!table.children.length) {
+        table.innerHTML =
+            "<tr><td colspan='4'>No versions available.</td></tr>";
+    }
+}
+
+// DELETE DOCUMENT
+function deleteDocument(id) {
+
+    documents = getData("tv_documents");
+
+    const doc = documents.find(item => item.id === id);
+
+    if (!doc || doc.ownerId !== currentUser.id) {
+        alert("Only owner can delete.");
+        return;
+    }
+
+    if (!confirm("Move document to Trash?")) return;
+
+    doc.deleted = true;
+
+    trash = getData("tv_trash");
+
+    trash.push({
+        id: doc.id,
+        name: doc.name,
+        ownerId: doc.ownerId,
+        ownerName: doc.ownerName
+    });
+
+    saveData("tv_documents", documents);
+    saveData("tv_trash", trash);
+
+    logActivity("Moved document to Trash: " + doc.name);
+
+    renderDocuments();
+    updateDashboard();
+}
+
+// TRASH
+function renderTrash() {
+
+    refreshData();
+
+    const table = document.getElementById("trashTable");
+    table.innerHTML = "";
+
+    trash.filter(doc =>
+        doc.ownerId === currentUser.id
+    ).forEach(doc => {
+
+        const row = document.createElement("tr");
+
+        const name = document.createElement("td");
+        name.textContent = doc.name;
+
+        const owner = document.createElement("td");
+        owner.textContent = doc.ownerName;
+
+        const action = document.createElement("td");
+
+        const restore = document.createElement("button");
+        restore.className = "small-btn success";
+        restore.textContent = "Restore";
+        restore.onclick = () => restoreDocument(doc.id);
+
+        action.appendChild(restore);
+
+        row.append(name, owner, action);
+        table.appendChild(row);
+    });
+
+    if (!table.children.length) {
+        table.innerHTML =
+            "<tr><td colspan='3'>Trash is empty.</td></tr>";
+    }
+}
+
+// RESTORE
+function restoreDocument(id) {
+
+    documents = getData("tv_documents");
+    trash = getData("tv_trash");
+
+    const doc = documents.find(item => item.id === id);
+
+    if (!doc || doc.ownerId !== currentUser.id) {
+        alert("You cannot restore this document.");
+        return;
+    }
+
+    doc.deleted = false;
+    trash = trash.filter(item => item.id !== id);
+
+    saveData("tv_documents", documents);
+    saveData("tv_trash", trash);
+
+    logActivity("Restored document: " + doc.name);
+
+    renderTrash();
+    updateDashboard();
+}
+
+// AUDIT LOG
+function renderAudit() {
+
+    audit = getData("tv_audit");
+
+    const table = document.getElementById("auditTable");
+    table.innerHTML = "";
+
+    audit.filter(item =>
+        item.userId === currentUser.id
+    ).forEach(item => {
+
+        const row = document.createElement("tr");
+
+        [item.user, item.activity, item.date]
+        .forEach(value => {
+
+            const cell = document.createElement("td");
+            cell.textContent = value;
+
+            row.appendChild(cell);
+        });
+
+        table.appendChild(row);
+    });
+
+    if (!table.children.length) {
+        table.innerHTML =
+            "<tr><td colspan='3'>No activity found.</td></tr>";
+    }
+}
+
+// CSV REPORT
+function downloadCSV() {
+
+    audit = getData("tv_audit");
+
+    const myAudit = audit.filter(item =>
+        item.userId === currentUser.id
+    );
+
+    if (!myAudit.length) {
+        alert("No audit records.");
+        return;
+    }
+
+    const rows = [
+        ["User", "Activity", "Date & Time"],
+        ...myAudit.map(item => [
+            item.user, item.activity, item.date
+        ])
+    ];
+
+    const csv = rows.map(row =>
+        row.map(value =>
+            '"' + String(value).replace(/"/g, '""') + '"'
+        ).join(",")
+    ).join("\n");
+
+    const blob = new Blob([csv], {
+        type: "text/csv;charset=utf-8;"
+    });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "TrustVault_Audit_Report.csv";
+    link.click();
+
+    URL.revokeObjectURL(link.href);
+
+    logActivity("Downloaded audit CSV report");
+}
+
+// INITIAL PAGE
+refreshData();
+
+const savedSession = sessionStorage.getItem("tv_session");
+
+if (savedSession) {
+
+    currentUser = users.find(
+        user => user.id === savedSession
+    ) || null;
+
+    if (currentUser) {
+        openApp();
+    } else {
+        sessionStorage.removeItem("tv_session");
+        showRegister();
+    }
+
+} else {
+    showRegister();
+}
+
+</script>
+
+</body>
+</html>
